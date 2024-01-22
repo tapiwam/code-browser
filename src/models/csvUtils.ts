@@ -7,6 +7,8 @@ export interface CSVHeader {
   // If file has more than one header line then teh headerKey will be the combined key of the headers
   headerKeys: string[];
   headerLines: string[];
+  headerRecords: CSVRecord[][];
+  headerArray: string[][];
   hasErrors: boolean;
   errors: string[];
 }
@@ -52,6 +54,7 @@ function readHeaders(
   let numberOfColumns: number = 0;
   const headerKeys: string[] = [];
   const headerArray: string[][] = [];
+  const headerRecords: CSVRecord[][] = [];
 
   // Split csvStr into lines and get first lines upto numberOfHeaderLines
   const lines = getCleanLines(csvStr, newLine);
@@ -69,6 +72,10 @@ function readHeaders(
       headerLines: [],
       hasErrors,
       errors,
+      headerArray,
+      headerRecords,
+      delimeter,
+      newLine,
     };
   }
 
@@ -105,18 +112,41 @@ function readHeaders(
       headerLines,
       hasErrors,
       errors,
+      headerArray,
+      headerRecords,
     };
   }
 
   // Get header keys
   for (let i = 0; i < numberOfColumns; i++) {
     const headerKeyParts: string[] = [];
+
     for (let j = 0; j < numberOfHeaderLines; j++) {
       headerKeyParts.push(headerArray[j][i]);
     }
 
     const headerKey = headerKeyParts.join("-");
     headerKeys[i] = headerKey;
+  }
+
+  // Build header records
+  for (let i = 0; i < numberOfHeaderLines; i++) {
+    const headerRecordRow: CSVRecord[] = [];
+
+    for (let j = 0; j < numberOfColumns; j++) {
+      const headerRecord: CSVRecord = {
+        key: "H-" + i + "-" + j,
+        columnKey: headerKeys[j],
+        row: i,
+        column: j,
+        value: headerArray[i][j],
+        formattedValue: headerArray[i][j],
+        error: "",
+      };
+      headerRecordRow.push(headerRecord);
+    }
+
+    headerRecords.push(headerRecordRow);
   }
 
   return {
@@ -128,6 +158,8 @@ function readHeaders(
     headerLines,
     hasErrors,
     errors,
+    headerArray,
+    headerRecords,
   };
 }
 

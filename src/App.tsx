@@ -34,13 +34,13 @@ function App() {
         </GridItem>
 
         <Show above="lg">
-          <GridItem area="aside" bgColor="blue" paddingX={5}>
+          <GridItem area="aside" paddingX={5}>
             {/* Show file list */}
             <SideBar data={data} />
           </GridItem>
         </Show>
 
-        <GridItem area="main" bgColor={"green"}>
+        <GridItem area="main">
           {/* Show editor */}
 
           {/* <MonacoEditorView /> */}
