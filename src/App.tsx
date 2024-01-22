@@ -3,12 +3,19 @@ import { Grid, GridItem, Heading, Show } from "@chakra-ui/react";
 import NavBar from "./components/NavBar";
 import SideBar from "./components/SideBar";
 import treeData from "./data/sampleFiles";
-
-import Editor, { DiffEditor, useMonaco, loader } from "@monaco-editor/react";
-import MonacoEditorView from "./components/MonacoEditorView";
+import CSVGrid from "./components/CSVGrid";
+// import * as csvStr from "./data/sampleCsv.csv";
 
 function App() {
   const data = treeData;
+  // const csvStr = readFileSync("./data/sampleCsv.csv", "utf-8");
+
+  const csvStr = `
+  A,B,C,C,D,D
+  A1,B1,C1,D1,E1,F1
+  1,2,3,4,5,6
+  7,8,9,10,11,12
+  `;
 
   return (
     <>
@@ -36,7 +43,9 @@ function App() {
         <GridItem area="main" bgColor={"green"}>
           {/* Show editor */}
 
-          <MonacoEditorView />
+          {/* <MonacoEditorView /> */}
+
+          <CSVGrid csvStr={csvStr} />
         </GridItem>
       </Grid>
     </>
