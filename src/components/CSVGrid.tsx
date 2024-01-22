@@ -28,11 +28,12 @@ import {
 
 interface Props {
   csvStr: string;
+  oneCsvChange: (csvStr: string) => void;
 }
-const CSVGrid = ({ csvStr }: Props) => {
+const CSVGrid = ({ csvStr, oneCsvChange }: Props) => {
   const parsed: CSVData = readCsvFile(2, csvStr);
   const [data, setData] = useState(parsed);
-  console.log(data);
+  //   console.log(data);
 
   const onCellChange = (cell: CSVRecord, newValue: string) => {
     const clone: CSVData = cloneDeep(data);
@@ -40,10 +41,11 @@ const CSVGrid = ({ csvStr }: Props) => {
     const rowInData = cell.row - clone.headers.numberOfHeaderLines;
     const colInData = cell.column;
 
-    console.log("onCellChange", cell, newValue, rowInData, colInData);
+    // console.log("onCellChange", cell, newValue, rowInData, colInData);
     clone.records[rowInData][colInData].value = newValue;
     clone.records[rowInData][colInData].formattedValue = newValue;
     setData(clone);
+    oneCsvChange(modelToCsv(clone));
   };
 
   return (

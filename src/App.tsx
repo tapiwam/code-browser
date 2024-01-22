@@ -45,7 +45,7 @@ function App() {
 
           {/* <MonacoEditorView /> */}
 
-          <CSVGrid csvStr={csvStr} />
+          <CSVGrid csvStr={csvStr} oneCsvChange={(str) => console.log(str)} />
         </GridItem>
       </Grid>
     </>

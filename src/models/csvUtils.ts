@@ -241,7 +241,7 @@ function readCsvFile(
     errors: fileErrors,
   };
 
-  console.log(JSON.stringify(resp, null, 2));
+  // console.log(JSON.stringify(resp, null, 2));
   return resp;
 }
 
