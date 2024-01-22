@@ -3,7 +3,7 @@ import { useState } from "react";
 import _ from "lodash";
 
 import { CSVData, CSVRecord } from "./csv-types";
-import { addColumn, modelToCsv, readCsvFile } from "./csvUtils";
+import { addColumn, addRow, modelToCsv, readCsvFile } from "./csvUtils";
 
 import {
   ButtonGroup,
@@ -11,6 +11,7 @@ import {
   EditableInput,
   EditablePreview,
   HStack,
+  Input,
   Table,
   TableContainer,
   Tbody,
@@ -21,14 +22,15 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import CsvAddColumnButton from "./CsvAddColumnButton";
+import CsvAddRowButton from "../CsvAddRowButton";
 
 interface Props {
   csvStr: string;
-  oneCsvChange: (csvStr: string) => void;
+  onCsvChange: (csvStr: string) => void;
 }
-const CSVGrid = ({ csvStr, oneCsvChange }: Props) => {
+const CSVGrid = ({ csvStr, onCsvChange }: Props) => {
   const parsed: CSVData = readCsvFile(2, csvStr);
-  const [data, setData] = useState(parsed);
+  const [data, setData] = useState<CSVData>(parsed);
   console.log(data);
 
   const onCellChange = (cell: CSVRecord, newValue: string) => {
@@ -41,12 +43,21 @@ const CSVGrid = ({ csvStr, oneCsvChange }: Props) => {
     clone.records[rowInData][colInData].value = newValue;
     clone.records[rowInData][colInData].formattedValue = newValue;
     setData(clone);
-    oneCsvChange(modelToCsv(clone));
+    onCsvChange(modelToCsv(clone));
   };
 
   const onAddColumn = (columnKeys: string[]) => {
     const newdata = addColumn(data, columnKeys);
-    console.log("addColumn", columnKeys, newdata);
+    setData(newdata);
+    onCsvChange(modelToCsv(newdata));
+    console.log("addedColumn", columnKeys, newdata);
+  };
+
+  const onAddRow = () => {
+    const newdata = addRow(data);
+    setData(newdata);
+    onCsvChange(modelToCsv(newdata));
+    console.log("addedRow", newdata);
   };
 
   return (
@@ -57,6 +68,7 @@ const CSVGrid = ({ csvStr, oneCsvChange }: Props) => {
       <HStack mb={2}>
         <Text flex={1}>Name</Text>
         <ButtonGroup size={"xs"}>
+          <CsvAddRowButton onAddRow={onAddRow} />
           <CsvAddColumnButton
             numberOfColumnRows={data.headers.numberOfHeaderLines}
             onAddColumn={onAddColumn}
@@ -96,12 +108,24 @@ const CSVGrid = ({ csvStr, oneCsvChange }: Props) => {
                 {/* Data items from data */}
                 {line.map((col) => (
                   <Td key={col.key}>
-                    <Editable defaultValue={col.value}>
-                      <EditablePreview />
-                      <EditableInput
-                        onChange={(e) => onCellChange(col, e.target.value)}
+                    {col.value.length > 0 && (
+                      <Editable defaultValue={col.value}>
+                        <EditablePreview />
+                        <EditableInput
+                          placeholder="Enter value"
+                          onBlur={(e) => onCellChange(col, e.target.value)}
+                        />
+                      </Editable>
+                    )}
+
+                    {col.value.length === 0 && (
+                      <Input
+                        isInvalid
+                        variant={"outline"}
+                        onBlur={(e) => onCellChange(col, e.target.value)}
+                        placeholder="Enter value"
                       />
-                    </Editable>
+                    )}
                   </Td>
                 ))}
               </Tr>

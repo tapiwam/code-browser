@@ -4,8 +4,9 @@ export interface CSVHeader {
   numberOfColumns: number;
   // In standard CSV files this will be 1. For files liek rule files there can be more
   numberOfHeaderLines: number;
-  // If file has more than one header line then teh headerKey will be the combined key of the headers
+  // If file has more than one header line then the unique headerKey will be the combined key of the headers
   headerKeys: string[];
+
   headerLines: string[];
   headerRecords: CSVRecord[][];
   headerArray: string[][];
@@ -30,7 +31,7 @@ export interface CSVRecord {
   columnKey: string;
   row: number;
   column: number;
-  value: string | number;
+  value: string;
   formattedValue: string;
   error: string;
 }

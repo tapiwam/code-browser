@@ -320,7 +320,60 @@ function addColumn(data: CSVData, columnKeys: string[]): CSVData {
 
   clone.headers = header;
 
+  // Add new column to data
+
+  for (let i = 0; i < clone.records.length; i++) {
+    const colIndex = clone.headers.headerKeys.length - 1;
+    const newColumn: CSVRecord = {
+      key: `${i + clone.headers.numberOfHeaderLines}_${
+        header.headerKeys[colIndex]
+      }`,
+      value: "",
+      formattedValue: "",
+      columnKey: header.headerKeys[colIndex],
+      row: i + clone.headers.numberOfHeaderLines,
+      column: colIndex,
+      error: "",
+    };
+    clone.records[i].push(newColumn);
+  }
+
+  // Update lines
+  clone.rawData = modelToCsv(clone);
+  clone.lines = getCleanLines(clone.rawData, clone.headers.newLine);
+  clone.dataLines = clone.lines.slice(clone.headers.numberOfHeaderLines);
+
   console.log("Adding column", clone);
+  return clone;
+}
+
+function addRow(data: CSVData): CSVData {
+  const clone: CSVData = _.cloneDeep(data);
+  const records = clone.records;
+
+  // Template lines
+  const templateLine = ",".repeat(clone.headers.numberOfColumns) + "\n";
+  const templateRecordRow: CSVRecord[] = [];
+  for (let i = 0; i < clone.headers.numberOfColumns; i++) {
+    const newColumn: CSVRecord = {
+      key: `${i + clone.headers.numberOfHeaderLines}_${
+        clone.headers.headerKeys[i]
+      }`,
+      value: "",
+      formattedValue: "",
+      columnKey: clone.headers.headerKeys[i],
+      row: clone.headers.numberOfHeaderLines + records.length,
+      column: i,
+      error: "",
+    };
+    templateRecordRow.push(newColumn);
+  }
+
+  clone.records.push(templateRecordRow);
+  clone.lines.push(templateLine);
+  clone.dataLines.push(templateLine);
+  clone.rows++;
+
   return clone;
 }
 
@@ -332,4 +385,11 @@ function addColumn(data: CSVData, columnKeys: string[]): CSVData {
 // const b = readCsvFile(2, sample2);
 // console.log(modelToCsv(b));
 
-export { getCleanLines, modelToCsv, readCsvFile, readHeaders, addColumn };
+export {
+  getCleanLines,
+  modelToCsv,
+  readCsvFile,
+  readHeaders,
+  addColumn,
+  addRow,
+};

@@ -1,27 +1,21 @@
 import {
+  Button,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Input,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Button,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Text,
   useDisclosure,
-  Input,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
 } from "@chakra-ui/react";
 
-import {
-  Control,
-  FieldValues,
-  useFieldArray,
-  useForm,
-  useWatch,
-} from "react-hook-form";
+import { Control, useFieldArray, useForm, useWatch } from "react-hook-form";
 
 type FormValues = {
   columns: string[];
@@ -63,14 +57,16 @@ const CsvAddColumnButton = ({
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields } = useFieldArray({
     name: "columns",
     control,
   });
 
   const onSubmit = (data: FormValues) => {
-    console.log(data);
-    onAddColumn(data.columns);
+    // Trim data
+    const columns = data.columns.map((value) => value.trim());
+
+    onAddColumn(columns);
     // Reset form
     reset();
 
