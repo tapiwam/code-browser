@@ -1,39 +1,5 @@
-export interface CSVHeader {
-  delimeter: string;
-  newLine: string;
-  numberOfColumns: number;
-  // In standard CSV files this will be 1. For files liek rule files there can be more
-  numberOfHeaderLines: number;
-  // If file has more than one header line then teh headerKey will be the combined key of the headers
-  headerKeys: string[];
-  headerLines: string[];
-  headerRecords: CSVRecord[][];
-  headerArray: string[][];
-  hasErrors: boolean;
-  errors: string[];
-}
-
-export interface CSVData {
-  rows: number;
-  columns: number;
-  headers: CSVHeader;
-  rawData: string;
-  lines: string[];
-  dataLines: string[];
-  records: CSVRecord[][];
-  hasErrors: boolean;
-  errors: string[];
-}
-
-export interface CSVRecord {
-  key: string;
-  columnKey: string;
-  row: number;
-  column: number;
-  value: string | number;
-  formattedValue: string;
-  error: string;
-}
+import _ from "lodash";
+import { CSVData, CSVHeader, CSVRecord } from "./csv-types";
 
 function getCleanLines(csvStr: string, newLine: string = "\n"): string[] {
   return csvStr
@@ -52,7 +18,7 @@ function readHeaders(
   let hasErrors = false;
   const errors: string[] = [];
   let numberOfColumns: number = 0;
-  const headerKeys: string[] = [];
+  let headerKeys: string[] = [];
   const headerArray: string[][] = [];
   const headerRecords: CSVRecord[][] = [];
 
@@ -118,16 +84,7 @@ function readHeaders(
   }
 
   // Get header keys
-  for (let i = 0; i < numberOfColumns; i++) {
-    const headerKeyParts: string[] = [];
-
-    for (let j = 0; j < numberOfHeaderLines; j++) {
-      headerKeyParts.push(headerArray[j][i]);
-    }
-
-    const headerKey = headerKeyParts.join("-");
-    headerKeys[i] = headerKey;
-  }
+  headerKeys = computeHeaderKeys(headerArray);
 
   // Build header records
   for (let i = 0; i < numberOfHeaderLines; i++) {
@@ -161,6 +118,43 @@ function readHeaders(
     headerArray,
     headerRecords,
   };
+}
+
+function computeHeaderKeys(headerArray: string[][]): string[] {
+  console.log("Header lines: ", headerArray);
+
+  // Get number of columns from first header
+  const numberOfHeaderLines = headerArray.length;
+  const numberOfColumns = headerArray[0].length;
+  const headerKeys: string[] = [];
+
+  // Get header keys
+  for (let col = 0; col < numberOfColumns; col++) {
+    const headerKeyParts: string[] = [];
+
+    let key = "H";
+    for (let row = 0; row < numberOfHeaderLines; row++) {
+      // console.log(
+      //   "Processing - row=" +
+      //     row +
+      //     " col=" +
+      //     col +
+      //     " val=" +
+      //     headerArray[row][col]
+      // );
+
+      key = key + "-" + row + "-" + col;
+    }
+
+    // console.log("Adding key=" + key);
+
+    headerKeyParts.push(key);
+
+    const headerKey = headerKeyParts.join("-");
+    headerKeys[col] = headerKey;
+  }
+
+  return headerKeys;
 }
 
 function readCsvFile(
@@ -266,6 +260,36 @@ function modelToCsv(model: CSVData): string {
   return lines.join("\n");
 }
 
+function addColumn(data: CSVData, columnKeys: string[]): CSVData {
+  const clone: CSVData = _.cloneDeep(data);
+
+  const header = clone.headers;
+
+  if (columnKeys.length !== header.numberOfColumns) {
+    console.error("Column keys length does not match number of columns");
+    return data;
+  }
+
+  // Add new column to headerLines
+  for (let i = 0; i < columnKeys.length; i++) {
+    header.headerLines[i] += "," + columnKeys[i];
+  }
+
+  // Add new column to headerArray
+  for (let i = 0; i < columnKeys.length; i++) {
+    header.headerArray[i].push(columnKeys[i]);
+  }
+
+  // Compute new header keys
+  header.headerKeys = computeHeaderKeys(header.headerArray);
+
+  // Add to column count
+  clone.headers.numberOfColumns++;
+
+  console.log("Adding column", clone);
+  return clone;
+}
+
 // readHeaders(2, sample2);
 
 // const a = readCsvFile(1, sample1);
@@ -274,4 +298,4 @@ function modelToCsv(model: CSVData): string {
 // const b = readCsvFile(2, sample2);
 // console.log(modelToCsv(b));
 
-export { readHeaders, getCleanLines, readCsvFile, modelToCsv };
+export { getCleanLines, modelToCsv, readCsvFile, readHeaders, addColumn };

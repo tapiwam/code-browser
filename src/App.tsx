@@ -3,7 +3,7 @@ import { Grid, GridItem, Heading, Show } from "@chakra-ui/react";
 import NavBar from "./components/NavBar";
 import SideBar from "./components/SideBar";
 import treeData from "./data/sampleFiles";
-import CSVGrid from "./components/CSVGrid";
+import CSVGrid from "./components/csv-grid/CSVGrid";
 // import * as csvStr from "./data/sampleCsv.csv";
 
 function App() {
