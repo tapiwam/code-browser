@@ -20,7 +20,7 @@ function readHeaders(
   let numberOfColumns: number = 0;
   let headerKeys: string[] = [];
   const headerArray: string[][] = [];
-  const headerRecords: CSVRecord[][] = [];
+  let headerRecords: CSVRecord[][] = [];
 
   // Split csvStr into lines and get first lines upto numberOfHeaderLines
   const lines = getCleanLines(csvStr, newLine);
@@ -87,24 +87,12 @@ function readHeaders(
   headerKeys = computeHeaderKeys(headerArray);
 
   // Build header records
-  for (let i = 0; i < numberOfHeaderLines; i++) {
-    const headerRecordRow: CSVRecord[] = [];
-
-    for (let j = 0; j < numberOfColumns; j++) {
-      const headerRecord: CSVRecord = {
-        key: "H-" + i + "-" + j,
-        columnKey: headerKeys[j],
-        row: i,
-        column: j,
-        value: headerArray[i][j],
-        formattedValue: headerArray[i][j],
-        error: "",
-      };
-      headerRecordRow.push(headerRecord);
-    }
-
-    headerRecords.push(headerRecordRow);
-  }
+  headerRecords = computeHeaderRecords(
+    numberOfHeaderLines,
+    numberOfColumns,
+    headerArray,
+    headerKeys
+  );
 
   return {
     delimeter,
@@ -155,6 +143,44 @@ function computeHeaderKeys(headerArray: string[][]): string[] {
   }
 
   return headerKeys;
+}
+
+function computeHeaderRecordsFromObj(header: CSVHeader): CSVRecord[][] {
+  return computeHeaderRecords(
+    header.numberOfHeaderLines,
+    header.numberOfColumns,
+    header.headerArray,
+    header.headerKeys
+  );
+}
+
+function computeHeaderRecords(
+  numberOfHeaderLines: number,
+  numberOfColumns: number,
+  headerArray: string[][],
+  headerKeys: string[]
+): CSVRecord[][] {
+  const headerRecords: CSVRecord[][] = [];
+
+  for (let i = 0; i < numberOfHeaderLines; i++) {
+    const headerRecordRow: CSVRecord[] = [];
+
+    for (let j = 0; j < numberOfColumns; j++) {
+      const headerRecord: CSVRecord = {
+        key: "H-" + i + "-" + j,
+        columnKey: headerKeys[j],
+        row: i,
+        column: j,
+        value: headerArray[i][j],
+        formattedValue: headerArray[i][j],
+        error: "",
+      };
+      headerRecordRow.push(headerRecord);
+    }
+
+    headerRecords.push(headerRecordRow);
+  }
+  return headerRecords;
 }
 
 function readCsvFile(
@@ -265,8 +291,12 @@ function addColumn(data: CSVData, columnKeys: string[]): CSVData {
 
   const header = clone.headers;
 
-  if (columnKeys.length !== header.numberOfColumns) {
-    console.error("Column keys length does not match number of columns");
+  if (columnKeys.length !== header.numberOfHeaderLines) {
+    console.error(
+      "Column keys length does not match number of columns: " +
+        header.numberOfHeaderLines,
+      columnKeys
+    );
     return data;
   }
 
@@ -282,9 +312,13 @@ function addColumn(data: CSVData, columnKeys: string[]): CSVData {
 
   // Compute new header keys
   header.headerKeys = computeHeaderKeys(header.headerArray);
-
   // Add to column count
-  clone.headers.numberOfColumns++;
+  header.numberOfColumns++;
+
+  // Header records compute
+  header.headerRecords = computeHeaderRecordsFromObj(header);
+
+  clone.headers = header;
 
   console.log("Adding column", clone);
   return clone;

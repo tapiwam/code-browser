@@ -108,8 +108,8 @@ const CsvAddColumnButton = ({
                       required: true,
                       validate: {
                         notEmpty: (value) => value.trim() !== "",
-                        minLength: (v) => v.trim().length >= 2,
-                        alphaNumeric: (v) => /^[a-zA-Z0-9]+$/.test(v),
+                        minLength: (v) => v.trim().length >= 1,
+                        alphaNumeric: (v) => /^[a-zA-Z0-9 ]+$/.test(v.trim()),
                       },
                     })}
                     id={field.id}
@@ -125,7 +125,7 @@ const CsvAddColumnButton = ({
                     )}
                     {errors?.columns?.[index]?.type === "minLength" && (
                       <Text size={"sm"} color="red.500">
-                        Column name must be at least 2 characters
+                        Column name must be at least One character
                       </Text>
                     )}
                     {errors?.columns?.[index]?.type === "alphaNumeric" && (

@@ -2,11 +2,10 @@ import { useState } from "react";
 
 import _ from "lodash";
 
-import { modelToCsv, readCsvFile, addColumn } from "./csvUtils";
 import { CSVData, CSVRecord } from "./csv-types";
+import { addColumn, modelToCsv, readCsvFile } from "./csvUtils";
 
 import {
-  Button,
   ButtonGroup,
   Editable,
   EditableInput,
@@ -45,12 +44,9 @@ const CSVGrid = ({ csvStr, oneCsvChange }: Props) => {
     oneCsvChange(modelToCsv(clone));
   };
 
-  const addColumn = (columnKeys: string[]) => {
-    // const clone: CSVData = _.cloneDeep(data);
-    // clone = addColumn(clone, columnKeys);
-    // setData(clone);
-    // oneCsvChange(modelToCsv(clone));
-    console.log("addColumn", columnKeys);
+  const onAddColumn = (columnKeys: string[]) => {
+    const newdata = addColumn(data, columnKeys);
+    console.log("addColumn", columnKeys, newdata);
   };
 
   return (
@@ -63,7 +59,7 @@ const CSVGrid = ({ csvStr, oneCsvChange }: Props) => {
         <ButtonGroup size={"xs"}>
           <CsvAddColumnButton
             numberOfColumnRows={data.headers.numberOfHeaderLines}
-            onAddColumn={addColumn}
+            onAddColumn={onAddColumn}
           />
         </ButtonGroup>
       </HStack>
